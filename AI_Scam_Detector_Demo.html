@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Scam Detector — Demo</title>
+<style>
+:root{--red:#8f1425;--gold:#e8a23a;--ink:#263238;--paper:#fbf8f0}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#f9f5eb,#fff);color:var(--ink)}
+header{background:var(--red);color:white;padding:24px 5vw}header h1{margin:0 0 8px;font-size:clamp(24px,4vw,38px)}header p{margin:0;opacity:.9}
+main{max-width:900px;margin:28px auto;padding:0 18px}.card{background:white;border-radius:18px;padding:22px;box-shadow:0 8px 30px #0001;margin-bottom:18px;border:1px solid #eee}
+label{display:block;font-weight:700;margin-bottom:10px}textarea{width:100%;min-height:145px;border:1px solid #ccd2d4;border-radius:10px;padding:14px;font:16px Arial;resize:vertical}
+button{background:var(--red);color:white;border:0;border-radius:10px;padding:13px 20px;font-size:16px;font-weight:700;margin-top:12px;cursor:pointer}button.secondary{background:#46534a;margin-left:8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}.chip{border:1px solid #ddd;border-radius:99px;padding:7px 10px;background:#fafafa;cursor:pointer;font-size:13px}
+.result{display:none;border-radius:12px;padding:18px;margin-top:18px}.high{background:#fff0ef;border:1px solid #d44}.medium{background:#fff8df;border:1px solid #dfb63d}.low{background:#eaf7ee;border:1px solid #4b9a67}
+.result h2{margin:0 0 8px}.notice{font-size:13px;color:#5e6668;line-height:1.5}.safe{background:#f4f5f5;border-left:4px solid var(--gold);padding:12px;border-radius:6px;margin-top:12px}
+li{margin:7px 0}footer{text-align:center;padding:20px;font-size:12px;color:#666}
+</style></head><body>
+<header><h1>🛡️ AI Scam Detector</h1><p>Investor protection through clear, explainable scam-warning signs.</p></header>
+<main>
+<div class="card"><h2>Check a suspicious message</h2><p>Paste a message, link description, or financial claim. Demo text is analyzed in your browser.</p>
+<label for="message">Message or claim</label><textarea id="message" placeholder="Example: Guaranteed 3x returns in 10 days. Pay now and share your OTP..."></textarea>
+<div class="chips"><span class="chip" onclick="sample(0)">Try guaranteed-return example</span><span class="chip" onclick="sample(1)">Try fake urgency example</span><span class="chip" onclick="sample(2)">Try neutral education example</span></div>
+<button onclick="analyze()">Analyze warning signs</button><button class="secondary" onclick="clearAll()">Clear</button>
+<div id="result" class="result" aria-live="polite"></div></div>
+<div class="card"><h3>Safety checklist</h3><ul><li>Never share OTPs, PINs, passwords, or remote-access codes.</li><li>Do not trust guaranteed or unusually high returns.</li><li>Verify a firm or intermediary through official regulator sources independently.</li><li>Do not send money because someone creates urgency.</li></ul><p class="notice">This prototype is educational, not a definitive fraud verdict. A low warning level does not prove that a message is safe.</p></div>
+</main><footer>Hackathon prototype • No account, OTP, or personal financial data is collected.</footer>
+<script>
+const samples=[
+"Guaranteed 3x returns in 10 days! Pay ₹5,000 now and share your OTP to activate your trading account.",
+"Your account will be blocked in 15 minutes. Click this unknown link and transfer money immediately to avoid a penalty.",
+"Volatility describes how much an asset's price can fluctuate. Read official documents and consider risks before making decisions."
+];
+function sample(i){document.getElementById('message').value=samples[i]}
+function clearAll(){document.getElementById('message').value='';document.getElementById('result').style.display='none'}
+function analyze(){
+ const t=document.getElementById('message').value.trim().toLowerCase();
+ const r=document.getElementById('result');
+ if(!t){r.className='result medium';r.style.display='block';r.innerHTML='<h2>Please enter a message</h2><p>Paste text to check for warning signs.</p>';return}
+ const checks=[
+  ['guaranteed / fixed / risk-free returns',/guaranteed|risk.free|fixed returns|double your money|triple your money|3x returns|100% profit/.test(t)],
+  ['urgency or pressure',/urgent|immediately|now|within \\d+ minutes|blocked|last chance|act fast|limited time/.test(t)],
+  ['OTP, PIN, password, or access-code request',/otp|pin|password|passcode|remote access/.test(t)],
+  ['upfront payment or transfer request',/pay now|send money|transfer money|deposit now|upfront|₹|rs\\.?\\s*\\d/.test(t)],
+  ['unknown link or click request',/click this|unknown link|bit\\.ly|tinyurl|http:\\/\\//.test(t)],
+  ['unverified authority or registration claim',/sebi approved|official broker|registration number|licensed guaranteed/.test(t)]
+ ];
+ const found=checks.filter(x=>x[1]).map(x=>x[0]);
+ let level=found.length>=3?'HIGH RISK SIGNALS':found.length>=1?'CAUTION — CHECK CAREFULLY':'FEWER COMMON RED FLAGS DETECTED';
+ r.className='result '+(found.length>=3?'high':found.length>=1?'medium':'low');r.style.display='block';
+ r.innerHTML='<h2>'+level+'</h2><p>Detected '+found.length+' common warning pattern(s).</p>'+
+ (found.length?'<ul>'+found.map(x=>'<li>'+x+'</li>').join('')+'</ul>':'<p>No tested pattern was detected. This does not mean the message is safe.</p>')+
+ '<div class="safe"><b>Safer next steps</b><br>Pause before paying. Never share OTP/PIN/passwords. Verify the claim independently through official channels. If money has already been sent, contact your bank immediately and use the official cybercrime reporting channel.</div>'+
+ '<p class="notice">This is a rule-based demonstration, not a trained AI model or a definitive fraud determination. It does not verify URLs or regulator databases live.</p>';
+}
+</script></body></html>
